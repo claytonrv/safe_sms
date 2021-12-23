@@ -1,15 +1,15 @@
 import csv
-from typing import List, Tuple
 import matplotlib.pyplot as plt
 import nltk
 import os
 import pandas as pd
 from pandas import DataFrame
+from typing import List, Tuple
 
 from wordcloud import WordCloud, STOPWORDS
 from os.path import dirname, abspath
 
-from data_tools import remove_special_symbols, tokenize_and_lemmatize_text, is_missing_data
+from data_tools import remove_special_symbols, tokenize_and_lemmatize_and_steam_text, is_missing_data
 
 SPAM_CLASS = 1
 HAM_CLASS = 0
@@ -60,7 +60,7 @@ def get_and_clean_data():
         if not is_missing_data(item):
             text = item.get('text')
             clean_text = remove_special_symbols(text=text)
-            tokens, lemmas = tokenize_and_lemmatize_text(clean_text)
+            tokens, lemmas = tokenize_and_lemmatize_and_steam_text(clean_text)
             item['text'] = clean_text
             clean_dataset.append({
                 'class': item['class'],
