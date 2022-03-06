@@ -216,6 +216,12 @@ def get_train_and_test_data(dataframe: DataFrame) -> Tuple[DataFrame, DataFrame]
     return train, test
     
 
+def get_train_data():
+    original_data, clean_dataset = get_and_clean_data()
+    dataframe = get_dataframe_from_dict(original_data)
+    train,test = get_train_and_test_data(dataframe)
+    return train
+
 if __name__ == "__main__":
     original_data, clean_dataset = get_and_clean_data()
     spam_list, ham_list = get_data_by_class(clean_dataset)
