@@ -11,15 +11,23 @@ class ModelTrainer:
         model_name = type(model).__name__
         print(f'Training {model_name}')
         accuracy_results = []
-        train_dataframe = get_train_data()
+        train_dataframe,test_dataframe = get_train_data()
+        # training the model with unigrams and bigrams
         vectorizer = CountVectorizer(ngram_range=(1, 2))
-        x = vectorizer.fit_transform(train_dataframe['text'])
-        y = train_dataframe['class']
+        train_x = vectorizer.fit_transform(train_dataframe['text'])
+
+        # training the model with simple tokens count
+        # train_x = train_dataframe['words_count'].values.reshape(-1,1)
+        
+        # training the model with spam words count inside the original text
+        # train_x = train_dataframe['spam_words_count'].values.reshape(-1,1)
+        train_y = train_dataframe['class']
         for i in range(0, 100):
-            x, y = shuffle(x,y)
+            x, y = shuffle(train_x,train_y)
+            test_x,test_y = shuffle(test_x,test_y)
             model.fit(x, y)
-            result = cross_val_predict(model, x, y, cv=10)
-            accuracy = metrics.accuracy_score(y, result)
+            result = cross_val_predict(model, test_x, test_y, cv=10)
+            accuracy = metrics.accuracy_score(test_y, result)
             accuracy_results.append(accuracy)
         
         average = sum(accuracy_results) / len(accuracy_results)

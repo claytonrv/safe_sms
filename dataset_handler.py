@@ -66,7 +66,8 @@ def get_and_clean_data():
                 'class': item['class'],
                 'text': clean_text,
                 'tokens': tokens,
-                'lemmas': lemmas
+                'lemmas': lemmas,
+                'words_count': len(tokens)
             })
     return original_dataset, clean_dataset
 
@@ -218,9 +219,18 @@ def get_train_and_test_data(dataframe: DataFrame) -> Tuple[DataFrame, DataFrame]
 
 def get_train_data():
     original_data, clean_dataset = get_and_clean_data()
-    dataframe = get_dataframe_from_dict(original_data)
+    spam_list, ham_list = get_data_by_class(clean_dataset)
+    most_commom_spam_words = get_most_common_words(spam_list)
+
+    for item in clean_dataset:
+        tokens = item['tokens']
+        top_spam_words = [tuple[0] for tuple in most_commom_spam_words]
+        spam_words_count = len(list(set(tokens) & set(top_spam_words)))
+        item['spam_words_count'] = spam_words_count
+
+    dataframe = get_dataframe_from_dict(clean_dataset)
     train,test = get_train_and_test_data(dataframe)
-    return train
+    return train,test
 
 if __name__ == "__main__":
     original_data, clean_dataset = get_and_clean_data()
