@@ -12,6 +12,8 @@ class ModelTrainer:
         print(f'Training {model_name}')
         accuracy_results = []
         train_dataframe,test_dataframe = get_train_data()
+        test_x = test_dataframe['spam_words_count'].values.reshape(-1,1)
+        test_y = test_dataframe['class']
         # training the model with unigrams and bigrams
         vectorizer = CountVectorizer(ngram_range=(1, 2))
         train_x = vectorizer.fit_transform(train_dataframe['text'])
