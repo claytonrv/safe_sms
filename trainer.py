@@ -1,3 +1,4 @@
+import joblib
 from dataset_handler import get_train_data
 from sklearn.model_selection import cross_val_predict
 from sklearn.utils import shuffle
@@ -7,7 +8,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 class ModelTrainer:
     
     @classmethod
-    def run(cls, model):
+    def run(cls, model, save):
         model_name = type(model).__name__
         print(f'Training {model_name}')
         accuracy_results = []
@@ -34,3 +35,9 @@ class ModelTrainer:
         
         average = sum(accuracy_results) / len(accuracy_results)
         print(f'{model_name}, Cross-validation result: {average}')
+
+        if save:
+            model_path = 'persistence/model.joblib'
+            vectorizer_path = 'persistence/vectorizer.joblib'
+            joblib.dump(model, model_path)
+            joblib.dump(vectorizer, vectorizer_path)

@@ -20,19 +20,44 @@ classification_models = [
     MultinomialNB()
 ]
 
-print("BEGINNING THE SCRIPT")
-print()
 
-init_time = time()
-for model in classification_models:
+def train(model, save):
     print("#################################################################")
     classification_model_name = type(model).__name__
-    ModelTrainer.run(model)
+    ModelTrainer.run(model, save)
     print(f"This iteration has run the following model: {classification_model_name}")
     print("#################################################################")
 
-finish_time = time()
-print("FINISHING THE SCRIPT")
-print(f"Init time: {init_time}")
-print(f"Finish time: {finish_time}")
-print(f"Total execution time: {finish_time - init_time}")
+
+def train_all_models():
+    print("BEGINNING THE SCRIPT")
+    print()
+
+    init_time = time()
+    for model in classification_models:
+        train(model)
+
+    finish_time = time()
+    print("FINISHING THE SCRIPT")
+    print(f"Init time: {init_time}")
+    print(f"Finish time: {finish_time}")
+    print(f"Total execution time: {finish_time - init_time}")
+
+def train_selected_algorithm(model):
+    print("BEGINNING THE SCRIPT")
+    print()
+
+    init_time = time()
+    train(model=model, save=True)
+
+    finish_time = time()
+    print("FINISHING THE SCRIPT")
+    print(f"Init time: {init_time}")
+    print(f"Finish time: {finish_time}")
+    print(f"Total execution time: {finish_time - init_time}")
+
+
+if __name__ == "__main__":
+    # train_all_models()
+    selected_algoritm = classification_models[0]
+    train_selected_algorithm(selected_algoritm)
