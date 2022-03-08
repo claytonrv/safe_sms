@@ -74,6 +74,9 @@ def is_missing_data(row: dict) -> bool:
     Raises:
         -
     """
-    valid_class = row['class'] is None or row['class'] == ''
+    try:
+        valid_class = row['class'] is None or row['class'] == ''
+    except KeyError:
+        valid_class = False
     valid_text = row['text'] is None or row['text'] == '' or len(row['text']) < 3
     return valid_class and valid_text

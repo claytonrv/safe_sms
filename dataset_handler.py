@@ -1,4 +1,5 @@
 import csv
+import json
 import matplotlib.pyplot as plt
 import nltk
 import os
@@ -19,8 +20,25 @@ TEXT_TO_NUMBER_CLASS_MAP = {
     'ham': 0
 }
 
-def _import_dataset(dataset_path: str=None) -> List[dict]:
-    """ Open and convert the dataset to a dict list
+def _import_json_dataset(dataset_path: str=None) -> List[dict]:
+    """ Imports the json dataset
+    Args: 
+        dataset_path: The full path for a new dataset. By default it will use the spam.csv dataset if it is not defined.
+    Returns:
+        list[json]: Returns list of dictionaries containing two attributes: text and class
+    Raises:
+        -
+    """
+    dataset_folder = 'dataset'
+    directory = os.getcwd()
+    dataset_filename = 'smsspamcollection.json'
+    full_path = os.path.join(directory, dataset_folder, dataset_filename)
+    with open(full_path) as json_file:
+        json_dataset = json.loads(json_file.read())
+        return json_dataset['smsCorpus']['message']
+
+def _import_csv_dataset(dataset_path: str=None) -> List[dict]:
+    """ Open and convert the csv dataset to a dict list
     Args: 
         dataset_path: The full path for a new dataset. By default it will use the spam.csv dataset if it is not defined.
     Returns:
@@ -43,7 +61,21 @@ def _import_dataset(dataset_path: str=None) -> List[dict]:
             })
     return json_dataset
 
-def get_and_clean_data():
+def save_processed_datasets(clean_dataset):
+    dataset_folder = 'dataset'
+    directory = os.getcwd()
+    dataset_filename = 'smsspamcollection_clean.json'
+    full_path = os.path.join(directory, dataset_folder, dataset_filename)
+    with open(full_path, "w") as json_file:
+        json_file.write(json.dumps(clean_dataset))
+        json_file.close()
+
+def extract_text_from_json(dataset):
+    for item in dataset:
+        item['text'] = str(item['text']['$'])
+    return dataset
+
+def clean_dataset(original_dataset, ignore_missing_data):
     """ Clean the text, remove the rows with missing data, tokenize and lemmatize the text
     
     Args:
@@ -54,16 +86,20 @@ def get_and_clean_data():
     Raises:
         -
     """
-    original_dataset = _import_dataset()
+    # original_dataset = _import_csv_dataset()
     clean_dataset = []
     for item in original_dataset:
-        if not is_missing_data(item):
+        if not is_missing_data(item) or ignore_missing_data:
             text = item.get('text')
             clean_text = remove_special_symbols(text=text)
             tokens, lemmas = tokenize_and_lemmatize_and_steam_text(clean_text)
             item['text'] = clean_text
+            try:
+                text_class = item['class']
+            except KeyError:
+                text_class = None
             clean_dataset.append({
-                'class': item['class'],
+                'class': text_class,
                 'text': clean_text,
                 'tokens': tokens,
                 'lemmas': lemmas,
@@ -218,7 +254,8 @@ def get_train_and_test_data(dataframe: DataFrame) -> Tuple[DataFrame, DataFrame]
     
 
 def get_train_data():
-    original_data, clean_dataset = get_and_clean_data()
+    dataset = _import_csv_dataset()
+    original_data, clean_dataset = clean_dataset(dataset, False)
     spam_list, ham_list = get_data_by_class(clean_dataset)
     most_commom_spam_words = get_most_common_words(spam_list)
 
@@ -232,8 +269,15 @@ def get_train_data():
     train,test = get_train_and_test_data(dataframe)
     return train,test
 
+def _clean_json_dataset():
+    dataset = _import_json_dataset()
+    dataset = extract_text_from_json(dataset)
+    original_data, clean_dataset = clean_dataset(dataset, True)
+    save_processed_datasets(clean_dataset)
+
 if __name__ == "__main__":
-    original_data, clean_dataset = get_and_clean_data()
+    dataset = _import_csv_dataset()
+    original_data, clean_dataset = clean_dataset(dataset, True)
     spam_list, ham_list = get_data_by_class(clean_dataset)
     create_classes_bar_plot(spam_list, ham_list)
     create_most_commom_words_bar_plot(data=spam_list, type="spam")
