@@ -10,6 +10,8 @@ from typing import List, Tuple
 from wordcloud import WordCloud, STOPWORDS
 from os.path import dirname, abspath
 
+from sklearn.utils import resample
+
 from data_tools import remove_special_symbols, tokenize_and_lemmatize_and_steam_text, is_missing_data
 
 SPAM_CLASS = 1
@@ -19,23 +21,6 @@ TEXT_TO_NUMBER_CLASS_MAP = {
     'spam': 1,
     'ham': 0
 }
-
-def _import_json_dataset(dataset_path: str=None) -> List[dict]:
-    """ Imports the json dataset
-    Args: 
-        dataset_path: The full path for a new dataset. By default it will use the spam.csv dataset if it is not defined.
-    Returns:
-        list[json]: Returns list of dictionaries containing two attributes: text and class
-    Raises:
-        -
-    """
-    dataset_folder = 'dataset'
-    directory = os.getcwd()
-    dataset_filename = 'smsspamcollection.json'
-    full_path = os.path.join(directory, dataset_folder, dataset_filename)
-    with open(full_path) as json_file:
-        json_dataset = json.loads(json_file.read())
-        return json_dataset['smsCorpus']['message']
 
 def _import_csv_dataset(dataset_path: str=None) -> List[dict]:
     """ Open and convert the csv dataset to a dict list
@@ -75,7 +60,7 @@ def extract_text_from_json(dataset):
         item['text'] = str(item['text']['$'])
     return dataset
 
-def clean_dataset(original_dataset, ignore_missing_data):
+def clean_original_dataset(original_dataset):
     """ Clean the text, remove the rows with missing data, tokenize and lemmatize the text
     
     Args:
@@ -88,23 +73,22 @@ def clean_dataset(original_dataset, ignore_missing_data):
     """
     # original_dataset = _import_csv_dataset()
     clean_dataset = []
-    for item in original_dataset:
-        if not is_missing_data(item) or ignore_missing_data:
-            text = item.get('text')
-            clean_text = remove_special_symbols(text=text)
-            tokens, lemmas = tokenize_and_lemmatize_and_steam_text(clean_text)
-            item['text'] = clean_text
-            try:
-                text_class = item['class']
-            except KeyError:
-                text_class = None
-            clean_dataset.append({
-                'class': text_class,
-                'text': clean_text,
-                'tokens': tokens,
-                'lemmas': lemmas,
-                'words_count': len(tokens)
-            })
+    for index, row in original_dataset.iterrows():
+        text = row['text']
+        clean_text = remove_special_symbols(text=text)
+        tokens, lemmas = tokenize_and_lemmatize_and_steam_text(clean_text)
+        row['text'] = clean_text
+        try:
+            text_class = row['class']
+        except KeyError:
+            text_class = None
+        clean_dataset.append({
+            'class': text_class,
+            'text': clean_text,
+            'tokens': tokens,
+            'lemmas': lemmas,
+            'words_count': len(tokens)
+        })
     return original_dataset, clean_dataset
 
 def get_class_values(target_class: int, dataset: List[dict]) -> List[dict]:
@@ -235,7 +219,20 @@ def get_dataframe_from_dict(dict_dataset: List[dict]) -> DataFrame:
     Raises:
         -
     """
-    return pd.json_normalize(dict_dataset)
+    df = pd.json_normalize(dict_dataset)
+    df_majority = df[(df['class']==0)] 
+    df_minority = df[(df['class']==1)] 
+    df_minority_upsampled = resample(
+        df_minority, 
+        replace=True,    # sample with replacement
+        n_samples= 3870, # to match majority class
+        random_state=42
+    )  # reproducible results
+    original_dataset = pd.concat([df_minority_upsampled, df_majority])
+    original_dataset.dropna(subset=['text'], inplace=True)
+    original_dataset.dropna(subset=['class'], inplace=True)
+    original_dataset.reset_index()
+    return original_dataset
 
 def get_train_and_test_data(dataframe: DataFrame) -> Tuple[DataFrame, DataFrame]:
     """ Split the dataset in two parts (test and train)
@@ -254,8 +251,9 @@ def get_train_and_test_data(dataframe: DataFrame) -> Tuple[DataFrame, DataFrame]
     
 
 def get_train_data():
-    dataset = _import_csv_dataset()
-    original_data, clean_dataset = clean_dataset(dataset, False)
+    json_dataset = _import_csv_dataset()
+    dataset = get_dataframe_from_dict(json_dataset)
+    original_data, clean_dataset = clean_original_dataset(dataset)
     spam_list, ham_list = get_data_by_class(clean_dataset)
     most_commom_spam_words = get_most_common_words(spam_list)
 
@@ -269,15 +267,10 @@ def get_train_data():
     train,test = get_train_and_test_data(dataframe)
     return train,test
 
-def _clean_json_dataset():
-    dataset = _import_json_dataset()
-    dataset = extract_text_from_json(dataset)
-    original_data, clean_dataset = clean_dataset(dataset, True)
-    save_processed_datasets(clean_dataset)
-
 if __name__ == "__main__":
     dataset = _import_csv_dataset()
-    original_data, clean_dataset = clean_dataset(dataset, True)
+    dataframe = get_dataframe_from_dict(dataset)
+    original_data, clean_dataset = clean_original_dataset(dataframe)
     spam_list, ham_list = get_data_by_class(clean_dataset)
     create_classes_bar_plot(spam_list, ham_list)
     create_most_commom_words_bar_plot(data=spam_list, type="spam")
@@ -285,7 +278,6 @@ if __name__ == "__main__":
     create_spam_word_cloud(spam_list)
     create_ham_word_cloud(ham_list)
     plt.show()
-    dataframe = get_dataframe_from_dict(original_data)
     train, test = get_train_and_test_data(dataframe)
     print(train)
     print(test)
