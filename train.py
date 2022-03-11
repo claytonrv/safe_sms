@@ -35,7 +35,7 @@ def train_all_models():
 
     init_time = time()
     for model in classification_models:
-        train(model)
+        train(model=model, save=False)
 
     finish_time = time()
     print("FINISHING THE SCRIPT")
