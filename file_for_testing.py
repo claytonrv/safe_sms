@@ -52,9 +52,19 @@ if __name__ == "__main__":
         text = _clean_text(raw_text)
         clean_text_list.append((text, pair[1]))
 
+    hit = 0
+    miss = 0
+
     for index,pair in enumerate(clean_text_list):
         text = pair[0]
         result = predictor.predict(text)
         expected_result = "spam" if pair[1] == 1 else "ham"
         ham_or_spam = "spam" if result[0] == 1 else "ham"
+        if ham_or_spam == expected_result:
+            hit += 1 
+        else:
+            miss += 1
         print(f'PREDICTING TEXT NUMBER {index} \n PREDICTED CLASS: {ham_or_spam} \n EXPECTED CLASS: {expected_result}')
+    print()
+    print(f'Acertos: {hit} ({round((hit/(hit+miss)) * 100)}%)')
+    print(f'Erros {miss} ({round((miss/(hit+miss)) * 100)}%)')
