@@ -1,5 +1,8 @@
+import sys
+from os import path
+sys.path.append( path.dirname( path.dirname( path.abspath(__file__) ) ) )
 from predictor import Predictor
-from data_tools import remove_special_symbols, tokenize_and_lemmatize_and_steam_text
+from utils.data_tools import remove_special_symbols, tokenize_and_lemmatize_and_steam_text
 
 
 def _clean_text(text):

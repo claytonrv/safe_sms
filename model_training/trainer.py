@@ -1,3 +1,4 @@
+import os
 import joblib
 from dataset_handler import get_train_data
 from sklearn.model_selection import cross_val_predict
@@ -40,7 +41,11 @@ class ModelTrainer:
         print(cm)
 
         if save:
-            model_path = 'persistence/model.joblib'
-            vectorizer_path = 'persistence/vectorizer.joblib'
+            persistence_folder = 'persistence'
+            directory = os.getcwd()
+            model_filename = 'model.joblib'
+            vectorizer_filename = 'vectorizer.joblib'
+            model_path = os.path.join(directory, persistence_folder, model_filename)
+            vectorizer_path = os.path.join(directory, persistence_folder, vectorizer_filename)
             joblib.dump(model, model_path)
             joblib.dump(vectorizer, vectorizer_path)

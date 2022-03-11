@@ -1,18 +1,24 @@
 import csv
 import json
-import matplotlib.pyplot as plt
+import sys
 import nltk
 import os
+
 import pandas as pd
+import matplotlib.pyplot as plt
+
+from os import path
 from pandas import DataFrame
 from typing import List, Tuple
+
+sys.path.append( path.dirname( path.dirname( path.abspath(__file__) ) ) )
 
 from wordcloud import WordCloud, STOPWORDS
 from os.path import dirname, abspath
 
 from sklearn.utils import resample
 
-from data_tools import remove_special_symbols, tokenize_and_lemmatize_and_steam_text, is_missing_data
+from utils.data_tools import remove_special_symbols, tokenize_and_lemmatize_and_steam_text, is_missing_data
 
 SPAM_CLASS = 1
 HAM_CLASS = 0
