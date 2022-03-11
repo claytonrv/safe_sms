@@ -26,7 +26,18 @@ classification_models = [
 ]
 
 
-def train(model, save):
+def train(model: object, save:bool) -> None:
+    """ Calls the Classification trainer for the received algorithm
+
+    Args:
+        model: A classification algorithm object (E.g.: LogisticRegression)
+        save: A boolean value that indicates if the trained model should be save on
+            the persistence file or not
+    Returns:
+        -
+    Raises:
+        -
+    """
     print("#################################################################")
     classification_model_name = type(model).__name__
     ModelTrainer.run(model, save)
@@ -34,7 +45,16 @@ def train(model, save):
     print("#################################################################")
 
 
-def train_all_models():
+def train_all_models() -> None:
+    """ Calls training for the algorithms available
+
+    Args:
+        -
+    Returns:
+        -
+    Raises:
+        -
+    """
     print("BEGINNING THE SCRIPT")
     print()
 
@@ -48,7 +68,17 @@ def train_all_models():
     print(f"Finish time: {finish_time}")
     print(f"Total execution time: {finish_time - init_time}")
 
-def train_selected_algorithm(model):
+def train_selected_algorithm(model: object) -> None:
+    """ Calls training for the selected classification algorithm
+
+    Args:
+        model: A classification algorithm object (E.g.: LogisticRegression)
+        save:
+    Returns:
+        -
+    Raises:
+        -
+    """
     print("BEGINNING THE SCRIPT")
     print()
 

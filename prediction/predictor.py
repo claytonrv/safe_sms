@@ -10,7 +10,16 @@ class Predictor:
         self.vectorizer = None
         self.load()
 
-    def load(self):
+    def load(self) -> None:
+        """ Loads the classifier algorithm to memory
+        
+        Args:
+            -
+        Returns:
+            -
+        Raises:
+            -
+        """
         persistence_folder = 'persistence'
         directory = os.getcwd()
         model_filename = 'model.joblib'
@@ -20,6 +29,15 @@ class Predictor:
         self.model = joblib.load(model_path)
         self.vectorizer = joblib.load(vectorizer_path)
         
-    def predict(self, sms_text):
+    def predict(self, sms_text: str) -> str:
+        """ Classifies the received message into spam or ham
+
+        Args:
+            sms_text: The message to be classified
+        Returns:
+            string: The class for the message received
+        Raises:
+            -
+        """
         text = self.vectorizer.transform([sms_text])
         return self.model.predict(text)

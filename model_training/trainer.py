@@ -9,7 +9,18 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 class ModelTrainer:
     
     @classmethod
-    def run(cls, model, save):
+    def run(cls, model:object, save:bool) -> None:
+        """ Trains the received model
+
+        Args:
+            model: A classification algorithm object (E.g.: LogisticRegression)
+            save: A boolean value that indicates if the trained model should be save on
+                the persistence file or not
+        Returns:
+            -
+        Raises:
+            -
+        """
         model_name = type(model).__name__
         print(f'Training {model_name}')
         accuracy_results = []

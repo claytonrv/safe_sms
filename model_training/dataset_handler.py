@@ -34,8 +34,6 @@ def _import_csv_dataset(dataset_path: str=None) -> List[dict]:
         dataset_path: The full path for a new dataset. By default it will use the spam.csv dataset if it is not defined.
     Returns:
         list[json]: Returns list of dictionaries containing two attributes: text and class
-    Raises:
-        -
     """
     dataset_folder = 'dataset'
     directory = os.getcwd()
@@ -52,21 +50,7 @@ def _import_csv_dataset(dataset_path: str=None) -> List[dict]:
             })
     return json_dataset
 
-def save_processed_datasets(clean_dataset):
-    dataset_folder = 'dataset'
-    directory = os.getcwd()
-    dataset_filename = 'smsspamcollection_clean.json'
-    full_path = os.path.join(directory, dataset_folder, dataset_filename)
-    with open(full_path, "w") as json_file:
-        json_file.write(json.dumps(clean_dataset))
-        json_file.close()
-
-def extract_text_from_json(dataset):
-    for item in dataset:
-        item['text'] = str(item['text']['$'])
-    return dataset
-
-def clean_original_dataset(original_dataset):
+def clean_original_dataset(original_dataset:List[dict]) -> List[dict]:
     """ Clean the text, remove the rows with missing data, tokenize and lemmatize the text
     
     Args:
@@ -256,7 +240,16 @@ def get_train_and_test_data(dataframe: DataFrame) -> Tuple[DataFrame, DataFrame]
     return train, test
     
 
-def get_train_data():
+def get_train_data() -> Tuple[List[dict], List[dict]]:
+    """ Retrieves the dataset from disk, clean it, add train attributes and split it into train/test
+
+    Args:
+        -
+    Returns:
+        Tuple: A tuple containing the dataset split into two parts (train and test)
+    Raises:
+        -
+    """
     json_dataset = _import_csv_dataset()
     dataset = get_dataframe_from_dict(json_dataset)
     original_data, clean_dataset = clean_original_dataset(dataset)
