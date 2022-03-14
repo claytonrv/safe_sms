@@ -212,13 +212,20 @@ def get_dataframe_from_dict(dict_dataset: List[dict]) -> DataFrame:
     df = pd.json_normalize(dict_dataset)
     df_majority = df[(df['class']==0)] 
     df_minority = df[(df['class']==1)] 
-    df_minority_upsampled = resample(
-        df_minority, 
-        replace=True,    # sample with replacement
-        n_samples= 4828, # to match majority class
+    # df_minority_upsampled = resample(
+    #     df_minority, 
+    #     replace=True,    # sample with replacement
+    #     n_samples= 4828, # to match majority class
+    #     random_state=200
+    # )  # reproducible results
+    # original_dataset = pd.concat([df_minority_upsampled, df_majority])
+    df_majority_undersampled = resample(
+        df_majority, 
+        replace=False,    # sample with replacement
+        n_samples= 724,   # to match minority class
         random_state=200
     )  # reproducible results
-    original_dataset = pd.concat([df_minority_upsampled, df_majority])
+    original_dataset = pd.concat([df_majority_undersampled, df_minority])
     original_dataset.dropna(subset=['text'], inplace=True)
     original_dataset.dropna(subset=['class'], inplace=True)
     original_dataset.reset_index()

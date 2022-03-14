@@ -25,10 +25,10 @@ class ModelTrainer:
         print(f'Training {model_name}')
         accuracy_results = []
         train_dataframe,test_dataframe = get_train_data()
-        test_x = test_dataframe['spam_words_count'].values.reshape(-1,1)
+        vectorizer = TfidfVectorizer(ngram_range=(1, 2),lowercase=True,stop_words='english')
+        test_x = vectorizer.fit_transform(test_dataframe['text'])
         test_y = test_dataframe['class']
         # training the model with unigrams and bigrams
-        vectorizer = TfidfVectorizer(ngram_range=(1, 2),lowercase=True,stop_words='english')
         train_x = vectorizer.fit_transform(train_dataframe['text'])
 
         # training the model with simple tokens count
